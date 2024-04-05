@@ -1,54 +1,65 @@
 const { validationResult } = require("express-validator");
-const uuid = require("uuid");
 const HttpError = require("../models/http-error");
+const User = require("../models/user");
 
-const DUMMY_USERS = [
-  {
-    id: "u1",
-    username: "Saurabh",
-    email: "saurabh@email.com",
-    password: "SaurabhD",
-  },
-  {
-    id: "u2",
-    username: "Rohit",
-    email: "rohit@email.com",
-    password: "RohitD",
-  },
-];
-
-const getUsers = (req, res, nxt) => {
-  res.json({ users: DUMMY_USERS });
+const getUsers = async (req, res, nxt) => {
+  let users;
+  try {
+    users = await User.find({}, "-password");
+  } catch (err) {
+    return nxt(new HttpError(500, "Can't retrieve the users..."));
+  }
+  res.json({ users: users.map((user) => user.toObject({ getters: true })) });
 };
 
-const signup = (req, res, nxt) => {
+const signup = async (req, res, nxt) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return nxt(new HttpError(422, "Invalid data passed!"));
   }
   const { username, email, password } = req.body;
-  const hasUser = DUMMY_USERS.find((user) => user.email === email);
-  if (hasUser) {
-    return nxt(
-      new HttpError(422, "Couldn't create user, email ID already in use...")
-    );
+  let existingUser;
+  try {
+    existingUser = await User.findOne({ email });
+  } catch (err) {
+    return nxt(new HttpError(500, "Signup Failed..."));
   }
-  const user = {
-    id: uuid.v4(),
+
+  if (existingUser) {
+    return nxt(422, "User already exist, please try logging in...");
+  }
+  const user = new User({
     username,
     email,
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR2VPDJqR41JPRuE_2_bF7bcuQFg6tgLUWW0Q7WtIEoBg&s",
     password,
-  };
-  DUMMY_USERS.push(user);
-  res.status(201).json({ user });
+    places: [],
+  });
+
+  try {
+    await user.save();
+  } catch (error) {
+    return nxt(new HttpError(500, "Signing up Failed..."));
+  }
+
+  res.status(201).json({ user: user.toObject({ getters: true }) });
 };
 
-const login = (req, res, nxt) => {
+const login = async (req, res, nxt) => {
   const { email, password } = req.body;
-  const user = DUMMY_USERS.find((user) => user.email === email);
-  if (!user || user.password !== password) {
+
+  let user;
+  try {
+    user = await User.findOne({ email });
+  } catch (err) {
+    return nxt(new HttpError(500, "Login Failed..."));
+  }
+
+  if (!user || user.password === password) {
     return nxt(new HttpError(401, "Invalid Credentials!"));
   }
+
   res.status(200).json({ message: "Logged In!" });
 };
 
