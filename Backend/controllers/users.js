@@ -56,11 +56,13 @@ const login = async (req, res, nxt) => {
     return nxt(new HttpError(500, "Login Failed..."));
   }
 
-  if (!user || user.password === password) {
+  if (!user || user.password !== password) {
     return nxt(new HttpError(401, "Invalid Credentials!"));
   }
 
-  res.status(200).json({ message: "Logged In!" });
+  res
+    .status(200)
+    .json({ message: "Logged In!", user: user.toObject({ getters: true }) });
 };
 
 exports.getUsers = getUsers;

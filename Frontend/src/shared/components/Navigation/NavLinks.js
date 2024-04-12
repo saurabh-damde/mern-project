@@ -1,11 +1,14 @@
 import { useContext } from "react";
 import { NavLink } from "react-router-dom";
 import { AuthContext } from "../../context/auth-context";
-import "./NavLinks.css";
 import Button from "../FormElements/Button";
+import "./NavLinks.css";
 
 const NavLinks = (props) => {
-  const { isLoggedIn, switchLoginState } = useContext(AuthContext);
+  const { userId, isLoggedIn, switchLoginState } = useContext(AuthContext);
+  const onLogout = () => {
+    switchLoginState({ command: "Logout" });
+  };
   return (
     <ul className="nav-links">
       <li>
@@ -17,7 +20,7 @@ const NavLinks = (props) => {
         <>
           {" "}
           <li>
-            <NavLink to="/u1/places">My Places</NavLink>{" "}
+            <NavLink to={`/${userId}/places`}>My Places</NavLink>{" "}
           </li>
           <li>
             <NavLink to="/places/new">Add Place</NavLink>{" "}
@@ -31,7 +34,7 @@ const NavLinks = (props) => {
       )}
       {isLoggedIn && (
         <li>
-          <Button onClick={switchLoginState}>Logout</Button>
+          <Button onClick={onLogout}>Logout</Button>
         </li>
       )}
     </ul>

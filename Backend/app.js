@@ -10,6 +10,16 @@ const app = express();
 
 app.use(bodyParser.json());
 
+app.use((req, res, nxt) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE");
+  nxt();
+});
+
 app.use("/api/places", places);
 app.use("/api/users", users);
 
@@ -28,7 +38,7 @@ app.use((err, req, res, nxt) => {
 
 mongoose
   .connect(
-    "mongodb+srv://saurabh:Saurabh.3@mazino.wm8ui5a.mongodb.net/places?retryWrites=true&w=majority&appName=mazino"
+    "mongodb+srv://saurabh:Saurabh.3@mazino.wm8ui5a.mongodb.net/mern?retryWrites=true&w=majority&appName=mazino"
   )
   .then(() => app.listen(5000))
   .catch((err) => console.log(err));

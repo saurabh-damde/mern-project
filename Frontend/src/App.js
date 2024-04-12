@@ -1,9 +1,9 @@
 import { useCallback, useState } from "react";
 import {
+  Navigate,
   Route,
   BrowserRouter as Router,
   Routes,
-  Navigate,
 } from "react-router-dom";
 import "./App.css";
 import NewPlace from "./places/pages/NewPlace";
@@ -16,8 +16,16 @@ import Users from "./user/pages/Users";
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const changeLoginState = useCallback(() => {
-    setIsLoggedIn((curr) => !curr);
+  const [userId, setUserId] = useState(null);
+
+  const changeLoginState = useCallback(({ id = null, command = null }) => {
+    if (command !== "Logout") {
+      setIsLoggedIn(true);
+      setUserId(id);
+    } else {
+      setIsLoggedIn(false);
+      setUserId(null);
+    }
   }, []);
 
   let routes;
@@ -44,7 +52,11 @@ const App = () => {
 
   return (
     <AuthContext.Provider
-      value={{ isLoggedIn: isLoggedIn, switchLoginState: changeLoginState }}
+      value={{
+        isLoggedIn: isLoggedIn,
+        userId: userId,
+        switchLoginState: changeLoginState,
+      }}
     >
       <Router>
         <MainNavigation />

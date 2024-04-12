@@ -4,7 +4,7 @@ import PlaceItem from "./PlaceItem";
 import "./PlaceList.css";
 
 const PlaceList = (props) => {
-  const { items } = props;
+  const { items, onDelete } = props;
   if (items.length === 0) {
     return (
       <Card className="place-list center">
@@ -16,7 +16,7 @@ const PlaceList = (props) => {
     return (
       <ul className="place-list">
         {items.map((place) => (
-          <PlaceItem key={place.id} place={place} />
+          <PlaceItem key={place.id} place={place} onDelete={onDelete} />
         ))}
       </ul>
     );

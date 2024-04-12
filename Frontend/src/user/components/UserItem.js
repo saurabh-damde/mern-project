@@ -4,18 +4,18 @@ import Card from "../../shared/components/UIElements/Card";
 import "./UserItem.css";
 
 const UsersItem = (props) => {
-  const { id, name, image, places } = props.user;
+  const { id, username, image, places } = props.user;
   return (
     <li className="user-item">
       <Card className="user-item__content">
         <Link to={`/${id}/places`}>
           <div className="user-item__image">
-            <Avatar image={image} alt={name} />
+            <Avatar image={image} alt={username} />
           </div>
           <div className="user-item__info">
-            <h2>{name}</h2>
+            <h2>{username}</h2>
             <h3>
-              {places} {places === 1 ? "Place" : "Places"}
+              {places.length} {places.length === 1 ? "Place" : "Places"}
             </h3>
           </div>
         </Link>

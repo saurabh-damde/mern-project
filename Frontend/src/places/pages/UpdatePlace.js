@@ -1,114 +1,116 @@
-import { useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useContext, useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import Button from "../../shared/components/FormElements/Button";
 import Input from "../../shared/components/FormElements/Input";
+import ErrorModal from "../../shared/components/UIElements/ErrorModal";
+import LoadingSpinner from "../../shared/components/UIElements/LoadingSpinner";
+import { AuthContext } from "../../shared/context/auth-context";
 import { useForm } from "../../shared/hooks/form-hook";
+import { useHttpClient } from "../../shared/hooks/http-hook";
 import {
   VALIDATOR_MINLENGTH,
   VALIDATOR_REQUIRE,
 } from "../../shared/utils/validators";
 import "./PlaceForm.css";
-import Card from "../../shared/components/UIElements/Card";
-
-const PLACES = [
-  {
-    id: "p1",
-    title: "Empire State Building",
-    description: "One of the most famous sky scrapers in the world!",
-    image:
-      "https://cdn.britannica.com/73/114973-050-2DC46083/Midtown-Manhattan-Empire-State-Building-New-York.jpg",
-    address: "20 W 34th St., New York, NY 10001, United States",
-    location: {
-      lat: 40.7484405,
-      lng: -73.9882393,
-    },
-    creator: "u1",
-  },
-  {
-    id: "p2",
-    title: "Empire State Building",
-    description: "One of the most famous sky scrapers in the world!",
-    image:
-      "https://cdn.britannica.com/73/114973-050-2DC46083/Midtown-Manhattan-Empire-State-Building-New-York.jpg",
-    address: "20 W 34th St., New York, NY 10001, United States",
-    location: {
-      lat: 40.7484405,
-      lng: -73.9882393,
-    },
-    creator: "u2",
-  },
-];
 
 const UpdatePlace = (props) => {
-  const [isLoading, setIsLoading] = useState(true);
-  const placeId = useParams().placeId;
-  const place = PLACES.find((place) => place.id === placeId);
-
-  // eslint-disable-next-line
-  const initialInputs = useMemo(() => {
-    return {
+  const { userId } = useContext(AuthContext);
+  const { isLoading, error, sendRequest, clearError } = useHttpClient();
+  const [formState, inputChangeHandler, setFormData] = useForm(
+    {
       title: {
-        value: place.title,
-        isValid: true,
+        value: "",
+        isValid: false,
       },
       description: {
-        value: place.description,
-        isValid: true,
+        value: "",
+        isValid: false,
       },
-    };
-  });
-
-  const [formState, inputChangeHandler, setFormData] = useForm(
-    initialInputs,
-    true
+    },
+    false
   );
-  useEffect(() => {
-    place && setFormData(initialInputs, true);
-    setIsLoading(false);
-  }, [setFormData, initialInputs, place]);
-  const { title, description } = formState.inputs;
+  const [loadedPlace, setLoadedPlace] = useState();
+  const placeId = useParams().placeId;
+  const navigate = useNavigate();
 
-  const placeUpdateHandler = (event) => {
+  useEffect(() => {
+    (async () => {
+      try {
+        const response = await sendRequest(
+          `http://localhost:5000/api/places/${placeId}`
+        );
+        setLoadedPlace(response.place);
+        setFormData(
+          {
+            title: {
+              value: response.place.title,
+              isValid: true,
+            },
+            description: {
+              value: response.place.description,
+              isValid: true,
+            },
+          },
+          true
+        );
+      } catch (err) {
+        console.log(err);
+      }
+    })();
+    // eslint-disable-next-line
+  }, [placeId]);
+
+  const placeUpdateHandler = async (event) => {
     event.preventDefault();
-    console.log(formState); //send to server...
+    try {
+      await sendRequest(
+        `http://localhost:5000/api/places/${placeId}`,
+        "PATCH",
+        { "Content-Type": "application/json" },
+        JSON.stringify({
+          title: formState.inputs.title.value,
+          description: formState.description.value,
+        })
+      );
+      navigate(`/${userId}/places`);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
-  if (isLoading) {
-    return (
-      <Card>
-        <h2>Loading...</h2>
-      </Card>
-    );
-  }
   return (
-    !isLoading && (
-      <form className="place-form" onSubmit={placeUpdateHandler}>
-        <Input
-          id="title"
-          type="text"
-          label="Title"
-          element="input"
-          initialValue={title.value}
-          initialValidity={title.isValid}
-          validators={[VALIDATOR_REQUIRE()]}
-          errorText="Please enter a valid title..."
-          onChange={inputChangeHandler}
-        />
-        <Input
-          id="description"
-          label="Description"
-          element="textarea"
-          initialValue={description.value}
-          initialValidity={description.isValid}
-          validators={[VALIDATOR_MINLENGTH(10)]}
-          errorText="Please enter a valid description with at least 10 characters..."
-          onChange={inputChangeHandler}
-        />
-        <Button type="submit" disabled={!formState.isValid}>
-          Update Place Data
-        </Button>
-      </form>
-    )
+    <>
+      <ErrorModal error={error} onClear={clearError} />
+      {isLoading && <LoadingSpinner />}
+      {!isLoading && loadedPlace && (
+        <form className="place-form" onSubmit={placeUpdateHandler}>
+          <Input
+            id="title"
+            type="text"
+            label="Title"
+            element="input"
+            initialValue={loadedPlace.title}
+            initialValidity={true}
+            validators={[VALIDATOR_REQUIRE()]}
+            errorText="Please enter a valid title..."
+            onChange={inputChangeHandler}
+          />
+          <Input
+            id="description"
+            label="Description"
+            element="textarea"
+            initialValue={loadedPlace.description}
+            initialValidity={true}
+            validators={[VALIDATOR_MINLENGTH(10)]}
+            errorText="Please enter a valid description with at least 10 characters..."
+            onChange={inputChangeHandler}
+          />
+          <Button type="submit" disabled={!formState.isValid}>
+            Update Place Data
+          </Button>
+        </form>
+      )}
+    </>
   );
 };
 
