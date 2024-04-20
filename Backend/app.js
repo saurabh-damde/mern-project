@@ -1,7 +1,8 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
-
+const fs = require("fs");
+const path = require("path");
 const HttpError = require("./models/http-error");
 const places = require("./routes/places");
 const users = require("./routes/users");
@@ -9,6 +10,8 @@ const users = require("./routes/users");
 const app = express();
 
 app.use(bodyParser.json());
+
+app.use("/uploads/images", express.static(path.join("uploads", "images")));
 
 app.use((req, res, nxt) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -28,6 +31,11 @@ app.use((req, res, nxt) => {
 });
 
 app.use((err, req, res, nxt) => {
+  if (req.file) {
+    fs.unlink(req.file.path, (err) => {
+      console.log(err);
+    });
+  }
   if (res.headerSent) {
     return nxt(err);
   }

@@ -1,5 +1,6 @@
 import { useContext, useState } from "react";
 import Button from "../../shared/components/FormElements/Button";
+import ImageUpload from "../../shared/components/FormElements/ImageUpload";
 import Input from "../../shared/components/FormElements/Input";
 import Card from "../../shared/components/UIElements/Card";
 import ErrorModal from "../../shared/components/UIElements/ErrorModal";
@@ -40,7 +41,7 @@ const Auth = (props) => {
   const switchModeHandler = () => {
     if (!isLoginMode) {
       setFormData(
-        { ...formState.inputs, username: undefined },
+        { ...formState.inputs, username: undefined, image: undefined },
         email.isValid && password.isValid
       );
     } else {
@@ -49,6 +50,10 @@ const Auth = (props) => {
           ...formState.inputs,
           username: {
             value: "",
+            isValid: false,
+          },
+          image: {
+            value: null,
             isValid: false,
           },
         },
@@ -77,15 +82,16 @@ const Auth = (props) => {
       }
     } else {
       try {
+        const formData = new FormData();
+        formData.append("username", formState.inputs.username.value);
+        formData.append("email", formState.inputs.email.value);
+        formData.append("password", formState.inputs.password.value);
+        formData.append("image", formState.inputs.image.value);
         const response = await sendRequest(
           "http://localhost:5000/api/users/signup",
           "POST",
-          { "Content-Type": "application/json" },
-          JSON.stringify({
-            username: formState.inputs.username.value,
-            email: formState.inputs.email.value,
-            password: formState.inputs.password.value,
-          })
+          {},
+          formData
         );
         switchLoginState({ id: response.user.id, command: "Signup" });
       } catch (err) {
@@ -102,16 +108,24 @@ const Auth = (props) => {
         <h2 className="authentication__header">Login Required</h2>
         <form onSubmit={authHandler}>
           {!isLoginMode && (
-            <Input
-              id="username"
-              element="input"
-              type="text"
-              label="Username"
-              value={email.value}
-              validators={[VALIDATOR_REQUIRE()]}
-              errorText="Please enter a valid Username..."
-              onChange={inputChangeHandler}
-            />
+            <>
+              <Input
+                id="username"
+                element="input"
+                type="text"
+                label="Username"
+                value={email.value}
+                validators={[VALIDATOR_REQUIRE()]}
+                errorText="Please enter a valid Username..."
+                onChange={inputChangeHandler}
+              />
+              <ImageUpload
+                id="image"
+                center
+                onInput={inputChangeHandler}
+                errorText="Please provide an image..."
+              />
+            </>
           )}
           <Input
             id="email"

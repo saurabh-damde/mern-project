@@ -1,9 +1,10 @@
 const { validationResult } = require("express-validator");
+const mongoose = require("mongoose");
+const fs = require("fs");
 const HttpError = require("../models/http-error");
 const getCoordsForAddress = require("../utils/location");
 const Place = require("../models/place");
 const User = require("../models/user");
-const mongoose = require("mongoose");
 
 const getPlaceById = async (req, res, nxt) => {
   const id = req.params.id;
@@ -60,8 +61,7 @@ const createPlace = async (req, res, nxt) => {
     description,
     address,
     location,
-    image:
-      "https://cdn.britannica.com/73/114973-050-2DC46083/Midtown-Manhattan-Empire-State-Building-New-York.jpg",
+    image: req.file.path,
     creator,
   });
   let user;
@@ -114,11 +114,13 @@ const updatePlace = async (req, res, nxt) => {
 
 const deletePlace = async (req, res, nxt) => {
   const id = req.params.id;
+  let imagePath;
   try {
     const place = await Place.findById(id).populate("creator");
     if (!place) {
       return nxt(new HttpError(404, "Couldn't find the place..."));
     }
+    imagePath = place.image;
     const session = await mongoose.startSession();
     session.startTransaction();
     await place.deleteOne({ session });
@@ -130,6 +132,9 @@ const deletePlace = async (req, res, nxt) => {
       new HttpError(500, "An issue occurred while deleting the place...")
     );
   }
+  fs.unlink(imagePath, (err) => {
+    console.log(err);
+  });
   res.status(200).json({ message: "Place Deleted!" });
 };
 

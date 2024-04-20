@@ -31,8 +31,7 @@ const signup = async (req, res, nxt) => {
   const user = new User({
     username,
     email,
-    image:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR2VPDJqR41JPRuE_2_bF7bcuQFg6tgLUWW0Q7WtIEoBg&s",
+    image: req.file.path,
     password,
     places: [],
   });
