@@ -49,7 +49,7 @@ const createPlace = async (req, res, nxt) => {
   if (!errors.isEmpty()) {
     return nxt(new HttpError(422, "Invalid data passed!"));
   }
-  const { title, description, address, creator } = req.body;
+  const { title, description, address } = req.body;
   let location = {};
   try {
     location = await getCoordsForAddress(address);
@@ -62,11 +62,11 @@ const createPlace = async (req, res, nxt) => {
     address,
     location,
     image: req.file.path,
-    creator,
+    creator: req.userData.id,
   });
   let user;
   try {
-    user = await User.findById(creator);
+    user = await User.findById(req.userData.id);
   } catch (error) {
     return nxt(
       new HttpError(500, "An issue occurred while creating the place...")
@@ -100,6 +100,9 @@ const updatePlace = async (req, res, nxt) => {
   let place;
   try {
     place = await Place.findById(id);
+    if (place.creator.toString() !== req.userData.id) {
+      return new HttpError(401, "You're not allowed to edit this place...");
+    }
     place.title = title;
     place.description = description;
     await place.save();
@@ -120,6 +123,11 @@ const deletePlace = async (req, res, nxt) => {
     if (!place) {
       return nxt(new HttpError(404, "Couldn't find the place..."));
     }
+
+    if (place.creator.id !== req.userData.id) {
+      return new HttpError(401, "You're not allowed to edit this place...");
+    }
+
     imagePath = place.image;
     const session = await mongoose.startSession();
     session.startTransaction();

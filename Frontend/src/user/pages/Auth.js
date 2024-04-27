@@ -76,7 +76,11 @@ const Auth = (props) => {
             password: formState.inputs.password.value,
           })
         );
-        switchLoginState({ id: response.user.id, command: "Login" });
+        switchLoginState({
+          id: response.id,
+          token: response.token,
+          command: "Login",
+        });
       } catch (err) {
         console.log(err);
       }
@@ -93,7 +97,11 @@ const Auth = (props) => {
           {},
           formData
         );
-        switchLoginState({ id: response.user.id, command: "Signup" });
+        switchLoginState({
+          id: response.id,
+          token: response.token,
+          command: "Signup",
+        });
       } catch (err) {
         console.log(err);
       }

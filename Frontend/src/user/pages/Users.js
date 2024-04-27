@@ -17,8 +17,7 @@ const Users = () => {
         console.log(err);
       }
     })();
-    // eslint-disable-next-line
-  }, []);
+  }, [sendRequest]);
 
   return (
     <>

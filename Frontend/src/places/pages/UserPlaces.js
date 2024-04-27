@@ -22,8 +22,7 @@ const UserPlaces = (props) => {
         console.log(err);
       }
     })();
-    // eslint-disable-next-line
-  }, [userId]);
+  }, [userId, sendRequest]);
 
   const onDeleteHandler = (placeId) => {
     setLoadedPlaces((prev) => {

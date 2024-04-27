@@ -2,11 +2,13 @@ const { Router } = require("express");
 const { check } = require("express-validator");
 const places = require("../controllers/places");
 const fileUpload = require("../middleware/file-upload");
+const authCheck = require("../middleware/auth-check");
 
 const router = Router();
 
 router.get("/:id", places.getPlaceById);
 router.get("/user/:id", places.getPlacesByUserId);
+router.use(authCheck);
 router.post(
   "/",
   fileUpload.single("image"),

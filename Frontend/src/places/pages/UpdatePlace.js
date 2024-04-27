@@ -14,7 +14,7 @@ import {
 import "./PlaceForm.css";
 
 const UpdatePlace = (props) => {
-  const { userId } = useContext(AuthContext);
+  const { userId, token } = useContext(AuthContext);
   const { isLoading, error, sendRequest, clearError } = useHttpClient();
   const [formState, inputChangeHandler, setFormData] = useForm(
     {
@@ -57,8 +57,7 @@ const UpdatePlace = (props) => {
         console.log(err);
       }
     })();
-    // eslint-disable-next-line
-  }, [placeId]);
+  }, [placeId, setFormData, sendRequest]);
 
   const placeUpdateHandler = async (event) => {
     event.preventDefault();
@@ -66,7 +65,10 @@ const UpdatePlace = (props) => {
       await sendRequest(
         `http://localhost:5000/api/places/${placeId}`,
         "PATCH",
-        { "Content-Type": "application/json" },
+        {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         JSON.stringify({
           title: formState.inputs.title.value,
           description: formState.description.value,
