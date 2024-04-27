@@ -1,0 +1,11 @@
+{
+  "env": {
+    "user": "saurabh",
+    "password": "Saurabh",
+    "db": "mern",
+    "cluster": "mazino",
+    "app": "mazino",
+    "jwtKey": "privateKey-doNotShare-;)",
+    "geoCoding": ""
+  }
+}

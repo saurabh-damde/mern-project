@@ -1,7 +1,7 @@
 const axios = require("axios");
 const HttpError = require("../models/http-error");
 
-const API_KEY = ""; // Key to the google GeoCoding API
+const API_KEY = process.env.geoCoding; // Key to the google GeoCoding API
 
 const getCoordsForAddress = async (address) => {
   // Code for retrieving coordinates using google's API

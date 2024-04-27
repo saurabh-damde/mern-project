@@ -13,6 +13,10 @@ app.use(bodyParser.json());
 
 app.use("/uploads/images", express.static(path.join("uploads", "images")));
 
+// Uncomment for deploying as single app.
+// app.use(express.static("public"));
+
+// Comment this while deploying as single app
 app.use((req, res, nxt) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
@@ -26,6 +30,12 @@ app.use((req, res, nxt) => {
 app.use("/api/places", places);
 app.use("/api/users", users);
 
+// Uncomment for deploying as single app.
+// app.use((req, res, nxt) => {
+//   res.sendFile(path.resolve(__dirname, "public", "index.html"));
+// });
+
+// Comment this while deploying as single app
 app.use((req, res, nxt) => {
   nxt(new HttpError(404, "Couldn't find the specified route..."));
 });
@@ -46,7 +56,7 @@ app.use((err, req, res, nxt) => {
 
 mongoose
   .connect(
-    "mongodb+srv://saurabh:Saurabh.3@mazino.wm8ui5a.mongodb.net/mern?retryWrites=true&w=majority&appName=mazino"
+    `mongodb+srv://${process.env.user}:${process.env.password}@${process.env.cluster}.wm8ui5a.mongodb.net/${process.env.db}?retryWrites=true&w=majority&appName=${process.env.app}`
   )
-  .then(() => app.listen(5000))
+  .then(() => app.listen(process.env.PORT || 5000))
   .catch((err) => console.log(err));

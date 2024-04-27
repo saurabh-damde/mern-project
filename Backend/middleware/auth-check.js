@@ -10,7 +10,7 @@ module.exports = authCheck = (req, res, nxt) => {
     if (!token) {
       throw new Error("Authentication Failed!");
     }
-    const decodedToken = jwt.verify(token, "privateKey-doNotShare-;)");
+    const decodedToken = jwt.verify(token, process.env.jwtKey);
     req.userData = { id: decodedToken.id };
     nxt();
   } catch (err) {

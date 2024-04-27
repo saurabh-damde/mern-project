@@ -37,7 +37,7 @@ const UpdatePlace = (props) => {
     (async () => {
       try {
         const response = await sendRequest(
-          `http://localhost:5000/api/places/${placeId}`
+          `${process.env.REACT_APP_BACKEND_API_URL}/places/${placeId}`
         );
         setLoadedPlace(response.place);
         setFormData(
@@ -63,7 +63,7 @@ const UpdatePlace = (props) => {
     event.preventDefault();
     try {
       await sendRequest(
-        `http://localhost:5000/api/places/${placeId}`,
+        `${process.env.REACT_APP_BACKEND_API_URL}/places/${placeId}`,
         "PATCH",
         {
           "Content-Type": "application/json",

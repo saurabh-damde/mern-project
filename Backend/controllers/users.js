@@ -54,7 +54,7 @@ const signup = async (req, res, nxt) => {
 
   let token;
   try {
-    token = jwt.sign({ id: user.id }, "privateKey-doNotShare-;)", {
+    token = jwt.sign({ id: user.id }, process.env.jwtKey, {
       expiresIn: "1h",
     });
   } catch (err) {
@@ -93,7 +93,7 @@ const login = async (req, res, nxt) => {
 
   let token;
   try {
-    token = jwt.sign({ id: user.id }, "privateKey-doNotShare-;)", {
+    token = jwt.sign({ id: user.id }, process.env.jwtKey, {
       expiresIn: "1h",
     });
   } catch (err) {
